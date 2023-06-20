@@ -16,7 +16,10 @@ the proposed design. Our theoretical analysis and discussions develop a
 genuinely decentralized financial system essential for the Metaverse.
 Furthermore, we present the application of blockchain-based QFL in a hybrid
 metaverse powered by a metaverse observer and world model. Our implementation
-details and code are publicly available 1
+details and code are publicly available 1.
+
+# Files
+The dataset is inside the data folder. The code is divided into BQFL-avg, BQFL-inf, and BCFL-avg.
 
 Please install the required libraries. 
 # To run: 
