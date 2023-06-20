@@ -1,6 +1,6 @@
 # Decentralized Quantum Federated Learning for Metaverse: Analysis, Design, and Implementation 
 
-# Please install the required libraries. 
+Please install the required libraries. 
 # To run: 
   Sample command:
   
