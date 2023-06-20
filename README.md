@@ -8,7 +8,7 @@
   
   $ python main_bqfl_avg.py -ha 7,2 [For BQFL-avg with 7 workers and 2 miners]
   
-# The codes used here are from two works provided in the reference.
+The codes used here are from two works provided in the reference.
 Their Github link is also provided in the reference list.
 
 # References: 
