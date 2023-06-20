@@ -1,11 +1,11 @@
 # ***************************************References*************************************************************
-# References (Github Links):
 # [1] H. Chen, S. A. Asif, J. Park, C.-C. Shen, and M. Bennis, “Robust Blockchained Federated Learning with Model Validation and Proof-of-Stake Inspired Consensus.” arXiv, Jan. 09, 2021. Accessed: Nov. 12, 2022. [Online]. Available: http://arxiv.org/abs/2101.03300
 # Github Link: https://github.com/hanglearning/VBFL.git
 # [1] H. Zhao, “Exact Decomposition of Quantum Channels for Non-IID Quantum Federated Learning.” arXiv, Sep. 01, 2022. Accessed: Nov. 06, 2022. [Online]. Available: http://arxiv.org/abs/2209.00768
 # Github Link: https://github.com/JasonZHM/quantum-fed-infer.git (MIT Licence)
 # ***************************************References*************************************************************
 # reference - https://developer.ibm.com/technologies/blockchain/tutorials/develop-a-blockchain-application-from-scratch-in-python/
+
 import copy
 import json
 from hashlib import sha256
@@ -16,28 +16,18 @@ class Block:
 		self._previous_block_hash = previous_block_hash
 		self._transactions = transactions
 		self._nonce = nonce
-		# miner specific
 		self._miner_rsa_pub_key = miner_rsa_pub_key
 		self._mined_by = mined_by
 		self._mining_rewards = mining_rewards
-		# validator specific
-		# self._is_validator_block = is_validator_block
-		# the hash of the current block, calculated by compute_hash
 		self._pow_proof = pow_proof
 		self._signature = signature
 
-	# compute_hash() also used to return value for block verification
-	# if False by default, used for pow and verification, in which pow_proof has to be None, because at this moment -
-	# pow - block hash is None, so does not affect much
-	# verification - the block already has its hash
-	# if hash_entire_block == True -> used in set_previous_block_hash, where we need to hash the whole previous block
 	def compute_hash(self, hash_entire_block=False):
 		block_content = copy.deepcopy(self.__dict__)
 		if not hash_entire_block:
 			block_content['_pow_proof'] = None
 			block_content['_signature'] = None
 			block_content['_mining_rewards'] = None
-		# need sort keys to preserve order of key value pairs
 		return sha256(str(sorted(block_content.items())).encode('utf-8')).hexdigest()
 
 	def remove_signature_for_verification(self):
@@ -49,8 +39,6 @@ class Block:
 	def nonce_increment(self):
 		self._nonce += 1
 
-	# returners of the private attributes
-	
 	def return_previous_block_hash(self):
 		return self._previous_block_hash
 
@@ -68,8 +56,6 @@ class Block:
 		self._previous_block_hash = hash_to_set
 
 	def add_verified_transaction(self, transaction):
-		# after verified in cross_verification()
-		# transactions can be both workers' or validators' transactions
 		self._transactions.append(transaction)
 
 	def set_nonce(self, nonce):
@@ -82,7 +68,6 @@ class Block:
 		return self._mined_by
 
 	def set_signature(self, signature):
-		# signed by mined_by node
 		self._signature = signature
 
 	def return_signature(self):
@@ -97,7 +82,6 @@ class Block:
 	def return_transactions(self):
 		return self._transactions
 
-	# a temporary workaround to free GPU mem by delete txs stored in the blocks. Not good when need to resync chain
 	def free_tx(self):
 		try:
 			del self._transactions

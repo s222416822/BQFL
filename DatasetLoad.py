@@ -1,5 +1,4 @@
 # ***************************************References*************************************************************
-# References (Github Links):
 # [1] H. Chen, S. A. Asif, J. Park, C.-C. Shen, and M. Bennis, “Robust Blockchained Federated Learning with Model Validation and Proof-of-Stake Inspired Consensus.” arXiv, Jan. 09, 2021. Accessed: Nov. 12, 2022. [Online]. Available: http://arxiv.org/abs/2101.03300
 # Github Link: https://github.com/hanglearning/VBFL.git
 # [1] H. Zhao, “Exact Decomposition of Quantum Channels for Non-IID Quantum Federated Learning.” arXiv, Sep. 01, 2022. Accessed: Nov. 06, 2022. [Online]. Available: http://arxiv.org/abs/2209.00768
@@ -118,7 +117,7 @@ def extract_labels(filename):
 
 if __name__=="__main__":
     'test data set'
-    mnistDataSet = GetDataSet('mnist', True) # test NON-IID
+    mnistDataSet = GetDataSet('mnist', True)
     if type(mnistDataSet.train_data) is np.ndarray and type(mnistDataSet.test_data) is np.ndarray and \
             type(mnistDataSet.train_label) is np.ndarray and type(mnistDataSet.test_label) is np.ndarray:
         print('the type of data is numpy ndarray')
@@ -128,8 +127,8 @@ if __name__=="__main__":
     print('the shape of the test data set is {}'.format(mnistDataSet.test_data.shape))
     print(mnistDataSet.train_label[0:100], mnistDataSet.train_label[11000:11100])
 
-# add Gussian Noise to dataset
-# https://discuss.pytorch.org/t/how-to-add-noise-to-mnist-dataset-when-using-pytorch/59745
+
+
 class AddGaussianNoise(object):
     def __init__(self, mean=0., std=1.):
         self.std = std
