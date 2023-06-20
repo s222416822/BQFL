@@ -154,12 +154,13 @@ if __name__=="__main__":
             workers_needed = int(roles_requirement[0])
         except:
             workers_needed = 1
+        validators_needed = 1
+        # try:
+        #     validators_needed = int(roles_requirement[1])
+        # except:
+        #     validators_needed = 1
         try:
-            validators_needed = int(roles_requirement[1])
-        except:
-            validators_needed = 1
-        try:
-            miners_needed = int(roles_requirement[2])
+            miners_needed = int(roles_requirement[1])
         except:
             miners_needed = 1
     else:
@@ -192,12 +193,13 @@ if __name__=="__main__":
             workers_needed = int(roles_requirement[0])
         except:
             workers_needed = 1
+        validators_needed = 1
+        # try:
+        #     validators_needed = int(roles_requirement[1])
+        # except:
+        #     validators_needed = 1
         try:
-            validators_needed = int(roles_requirement[1])
-        except:
-            validators_needed = 1
-        try:
-            miners_needed = int(roles_requirement[2])
+            miners_needed = int(roles_requirement[1])
         except:
             miners_needed = 1
 
