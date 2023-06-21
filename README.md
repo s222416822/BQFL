@@ -1,5 +1,5 @@
 # Decentralized Quantum Federated Learning for Metaverse: Analysis, Design, and Implementation 
-This repo contains the code for this paper (arXiv). 
+This repo contains the code for this paper [arXiv](https://arxiv.org/abs/2306.11297). 
 
 # Abstract
 With the emerging developments of the Metaverse, a virtual world where people
