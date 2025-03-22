@@ -1,4 +1,4 @@
-# Decentralized Quantum Federated Learning for Metaverse: Analysis, Design, and Implementation 
+# Quantum Federated Learning for Metaverse: Analysis, Design and Implementation
  IEEE Transactions on Network and Service Management
 
 # Abstract
@@ -9,6 +9,12 @@ Comparative analysis with classical Federated Learning (CFL) highlights its prac
 New insights developed emphasize the importance of decentralized systems for the Metaverse’s evolution, 
 with a blockchain-based QFL application demonstrated in a hybrid model. Our evaluation, 
 implementation details and code are publicly available 1
+
+
+# Key Features
+- Trustworthy QFL framework for Metaverse
+- Tensorcircuit, Qiskit Implementation
+- Qiskit, Ethereum Blockchain Implementation, Smart Contracts
 
 # Paper
 - Arxiv version: [arxiv](https://arxiv.org/abs/2306.11297) [Latest not updated to Arxiv..]
