@@ -12,7 +12,7 @@ implementation details and code are publicly available 1
 
 # Paper
 - Arxiv version: [arxiv](https://arxiv.org/abs/2306.11297) [Latest not updated to Arxiv..]
-- Journal Version (TNSM): [Journal](https://ieeexplore.ieee.org/document/10930694)
+- Journal Version (TNSM): [Journal](https://ieeexplore.ieee.org/document/10930694) [Early Access Version]
 
 # Files
 The dataset is inside the data folder. The code is divided into BQFL-avg, BQFL-inf, and BCFL-avg.
