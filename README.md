@@ -1,5 +1,5 @@
 # Decentralized Quantum Federated Learning for Metaverse: Analysis, Design, and Implementation 
-
+ IEEE Transactions on Network and Service Management
 
 # Abstract
 We present a novel decentralized and trustworthy Quantum Federated Learning (QFL) framework tailored for the emerging Metaverse. 
