@@ -10,7 +10,7 @@ New insights developed emphasize the importance of decentralized systems for the
 with a blockchain-based QFL application demonstrated in a hybrid model. Our evaluation, 
 implementation details and code are publicly available 1
 
-#Paper
+# Paper
 - Arxiv version: [arxiv](https://arxiv.org/abs/2306.11297) [Latest not updated to Arxiv..]
 - Journal Version (TNSM): [Journal](https://ieeexplore.ieee.org/document/10930694)
 
