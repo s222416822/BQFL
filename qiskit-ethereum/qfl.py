@@ -1,0 +1,482 @@
+from datetime import datetime
+import os
+from qiskit_aer import AerSimulator
+from qiskit_aer.noise import NoiseModel
+# from qiskit_ibm_runtime import SamplerV2 as Sampler, QiskitRuntimeService
+from qiskit_ibm_runtime import Session, SamplerV2 as Sampler, QiskitRuntimeService
+from qiskit_ibm_runtime.fake_provider import FakeManilaV2
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+# from qiskit-ethereum.primitives import Sampler
+
+# data_used = "synthetic"
+data_used = "iris"
+# data_used = "genomics"
+# data_used = "mnist"
+# data_used = "mnist_keras"
+# data_used = "fashion"
+
+#
+data_size = "normal"
+# data_size = "small"
+subset_size_device = 1000
+subset_size_server = 100
+pca_n_components = [4, 10, 20, 40, 100]
+
+if data_used == "iris":
+  num_devices = 3
+elif data_used == "synthetic":
+  num_devices = 10
+elif data_used == "mnist":
+  num_devices = 10
+elif data_used == "mnist_keras":
+  num_devices = 10
+elif data_used == "fashion":
+  num_devices = 10
+elif data_used == "genomics":
+  num_devices = 10
+
+
+random_number = 1
+# print(f"Random Number: {random_number} for Device {i}")
+if random_number == 1:
+  maxiter = "1"
+else:
+  maxiter = "random"
+
+from sklearn.datasets import load_iris, load_digits
+from sklearn.model_selection import train_test_split
+from qiskit_algorithms.utils import algorithm_globals
+import numpy as np
+
+import numpy as np
+from genomic_benchmarks.dataset_getters.pytorch_datasets import DemoHumanOrWorm
+import numpy as np
+from qiskit_algorithms.utils import algorithm_globals
+from sklearn.model_selection import train_test_split
+
+from qiskit.circuit.library import ZZFeatureMap
+from qiskit.circuit.library import RealAmplitudes
+from qiskit_algorithms.optimizers import COBYLA, GradientDescent
+# from qiskit-ethereum.primitives import Sampler, StatevectorSampler
+from matplotlib import pyplot as plt
+from IPython.display import clear_output
+import time
+from qiskit_machine_learning.algorithms.classifiers import VQC
+
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.datasets import load_iris
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+from sklearn.decomposition import PCA
+# from qiskit-ethereum.primitives import Sampler
+algorithm_globals.random_seed = 123
+
+# data_used = "iris"
+
+if data_used == "iris":
+  iris_data = load_iris()
+
+  features_iris = iris_data.data
+  labels_iris = iris_data.target
+  #
+  # plt.rcParams["figure.figsize"] = (6, 6)
+  # sns.scatterplot(x=features_iris[:, 0], y=features_iris[:, 1], hue=labels_iris, palette="tab10")
+  # plt.title("IRIS Dataset")
+  # plt.xlabel("Feature 1")
+  # plt.ylabel("Feature 2")
+  # plt.show()
+
+  # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+  alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
+      features_iris, labels_iris, train_size=0.9, random_state=algorithm_globals.random_seed)
+
+  print(alldevices_train_features.shape)
+  print(server_test_features.shape)
+  print(alldevices_train_labels.shape)
+  print(server_test_labels.shape)
+
+  print(alldevices_train_features)
+  print(alldevices_train_labels)
+  print(server_test_features)
+  print(server_test_labels)
+
+elif data_used == "mnist":
+  # Load the MNIST dataset
+  mnist_data = load_digits()
+  features_mnist = mnist_data.data
+  labels_mnist = mnist_data.target
+
+  # Apply PCA for dimensionality reduction
+  features_mnist_pca = PCA(n_components=4).fit_transform(features_mnist)
+
+  # Plot the PCA-transformed features
+  # plt.rcParams["figure.figsize"] = (6, 6)
+  # sns.scatterplot(x=features_mnist_pca[:, 0], y=features_mnist_pca[:, 1], hue=labels_mnist, palette="tab10")
+  # plt.title("MNIST Dataset")
+  # plt.xlabel("Principal Component 1")
+  # plt.ylabel("Principal Component 2")
+  # plt.show()
+
+  # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+  alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
+      features_mnist, labels_mnist, train_size=0.8, random_state=algorithm_globals.random_seed)
+
+  print(alldevices_train_features.shape)
+  print(server_test_features.shape)
+  print(alldevices_train_labels.shape)
+  print(server_test_labels.shape)
+
+  print(alldevices_train_features)
+  print(alldevices_train_labels)
+  print(server_test_features)
+  print(server_test_labels)
+
+elif data_used == "genomics":
+  # Importing and encoding to one hot endocing
+  # Initialize the dataset
+  train_dataset = DemoHumanOrWorm(split='train', version=0)
+  # Convert the training dataset to a list
+  train_data_list = list(train_dataset)
+  # Define the mapping of nucleotides to indices
+  nucleotide_map = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
+
+  # Perform one-hot encoding for each sequence in the dataset
+  encoded_sequences = []
+  labels = []
+  for sequence, label in train_data_list:
+      encoded_sequence = []
+      for nucleotide in sequence:
+          encoded_nucleotide = [0] * 4
+          if nucleotide in nucleotide_map:
+              index = nucleotide_map[nucleotide]
+              encoded_nucleotide[index] = 1
+          encoded_sequence.append(encoded_nucleotide)
+      encoded_sequences.append(encoded_sequence)
+      labels.append(label)
+
+  # Convert the encoded sequences and labels to numpy arrays
+  features_encoded_sequences_3D_np = np.array(encoded_sequences)
+  labels_encoded_sequences_3D_np = np.array(labels)
+
+  # Print the shapes of the arrays
+  print("Encoded Sequences Shape:", features_encoded_sequences_3D_np.shape)
+  print("Labels Shape:", labels_encoded_sequences_3D_np.shape)
+
+  # convert from (75000, 200, 4) into (75000, 800)
+  encoded_sequences_np_reshaped = features_encoded_sequences_3D_np.reshape(
+      features_encoded_sequences_3D_np.shape[0], -1)
+  # convert to 4 features
+  features_encoded_pca = PCA(n_components=4).fit_transform(encoded_sequences_np_reshaped)
+  features_encoded_pca
+
+  # plt.rcParams["figure.figsize"] = (6, 6)
+  # sns.scatterplot(x=features_encoded_pca[:, 0], y=features_encoded_pca[:, 1], hue=labels_encoded_sequences_3D_np,
+  #                 palette="tab10")
+  # plt.title("Encoded Sequences")
+  # plt.xlabel("Feature 1")
+  # plt.ylabel("Feature 2")
+  # plt.show()
+
+  # algorithm_globals.random_seed = 123
+  alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
+      features_encoded_pca, labels_encoded_sequences_3D_np, train_size=0.8,
+      random_state=algorithm_globals.random_seed)
+
+else:
+  print("No Data Set Selected!")
+
+print(f"Dataset used is: {data_used}")
+
+if data_size == "small":
+  total_samples = subset_size_device
+else:
+  total_samples = len(alldevices_train_features)
+
+random_indices = np.random.choice(len(alldevices_train_features), total_samples, replace=False)
+alldevices_train_features = alldevices_train_features[random_indices]
+alldevices_train_labels = alldevices_train_labels[random_indices]
+
+samples_per_device = total_samples // num_devices
+remainder = total_samples % num_devices
+
+devices_data = []
+devices_labels = []
+
+start_index = 0
+for i in range(num_devices):
+    # Determine the number of extra samples for the current device
+    extra_samples = 1 if i < remainder else 0
+    # Calculate the end index for the current device
+    end_index = start_index + samples_per_device + extra_samples
+    # Assign data and labels for the current device
+    device_data = np.array(alldevices_train_features[start_index:end_index])
+    device_labels = np.array(alldevices_train_labels[start_index:end_index])
+    # Update start index for the next device
+    start_index = end_index
+    # Append device data and labels to the lists
+    devices_data.append(device_data)
+    devices_labels.append(device_labels)
+
+# Print devices data and labels
+for i, (data, labels) in enumerate(zip(devices_data, devices_labels)):
+    print(f"Device {i + 1} data:", data)
+    print(f"Device {i + 1} labels:", labels)
+    print()
+
+
+# plt.rcParams["figure.figsize"] = (12, 6)
+
+
+
+import random
+class Device:
+    def __init__(self, idx, data, labels, optimizer, pca_n_component, simulator, aer_sim, sampler_object, maxiter=30, warm_start=None, initial_point=None):
+        self.idx = idx
+        self.features_encoded_pca = PCA(n_components=pca_n_component).fit_transform(data)
+        self.features = MinMaxScaler().fit_transform(self.features_encoded_pca)
+        self.target = labels
+        self.maxiter = maxiter
+        self.train_score_q4 = 0
+        self.test_score_q4 = 0
+        self.training_time = 0
+        self.state = "online_working"
+        self.current_comm_round = 0
+        self.params_per_iter = []
+        self.sampler = sampler_object
+        self.aer_sim = aer_sim
+
+        if optimizer == "cobyla":
+          self.optimizer = COBYLA(maxiter=self.maxiter)
+        elif optimizer == "gradientdescent":
+          self.optimizer = GradientDescent(maxiter=self.maxiter)
+
+        self.objective_func_vals = []
+        self.num_features = self.features.shape[1]
+        self.train_features, self.test_features, self.train_labels, self.test_labels = train_test_split(
+            self.features, self.target, train_size=0.8, random_state=algorithm_globals.random_seed
+        )
+        self.feature_map = ZZFeatureMap(feature_dimension=self.num_features, reps=1)
+        self.ansatz = RealAmplitudes(num_qubits=self.num_features, reps=3)
+        self.warm_start = warm_start
+        # self.vqc = VQC(
+        #     sampler=self.sampler,
+        #     feature_map=self.feature_map,
+        #     ansatz=self.ansatz,
+        #     optimizer=self.optimizer,
+        #     callback=self.callback_graph,
+        #     # initial_point=initial_point,
+        #     warm_start=self.warm_start
+        # )
+        pm = generate_preset_pass_manager(backend=self.aer_sim, optimization_level=1)
+        # isa_qc = pm.run(qc)
+        self.isa_qc_ansatz = pm.run(self.ansatz)
+        self.isa_qc_feature_map = pm.run(self.feature_map)
+        self.vqc = VQC(
+            sampler=self.sampler,
+            # feature_map=self.feature_map,
+            feature_map=self.isa_qc_feature_map,
+            # ansatz=self.ansatz,
+            ansatz=self.isa_qc_ansatz,
+            optimizer=self.optimizer,
+            callback=self.callback_graph,
+            # initial_point=initial_point,
+            warm_start=self.warm_start
+        )
+
+
+    def get_data(self):
+        return self.features
+
+    def get_target(self):
+        return self.target
+
+    def set_data(self, data):
+        self.features = MinMaxScaler().fit_transform(data)
+
+    def set_target(self, target):
+        self.target = target
+
+    def callback_graph(self, weights, obj_func_eval):
+        # clear_output(wait=True)
+        self.objective_func_vals.append(obj_func_eval)
+        self.params_per_iter.append(weights)
+        # plt.title(f"Device: {self.idx}")
+        # plt.xlabel("Iter")
+        # plt.ylabel("Loss")
+        # plt.plot(range(len(self.objective_func_vals)), self.objective_func_vals)
+        print(f"Comm Round: {self.current_comm_round} - Device {self.idx} - Weights: {weights}\n")
+        print(f"Comm Round: {self.current_comm_round} - Device {self.idx} -Objectivve Func Eval: {obj_func_eval}\n")
+        print(f"Comm Round: {self.current_comm_round} - Device {self.idx} - Weights: {weights}\n")
+        # plt.show()
+
+    def training(self, initial_point=None):
+        print(f"Train Features Shape: {self.train_features.shape}")
+        print(f"Train Labels Shape: {self.train_labels.shape}")
+
+        print(f"First Few Labels:\n{self.train_labels[:5]}")
+
+        start = time.time()
+        self.vqc.fit(self.train_features, self.train_labels)
+        self.training_time = time.time() - start
+
+        print(f"Training time: {round(self.training_time)} seconds")
+        self.train_score_q4 = self.vqc.score(self.train_features, self.train_labels)
+        self.test_score_q4 = self.vqc.score(self.test_features, self.test_labels)
+        print(f"Quantum VQC on the training dataset: {self.train_score_q4:.2f}")
+        print(f"Quantum VQC on the test dataset:     {self.test_score_q4:.2f}")
+
+    def log_status(self, n, device, status, logs):
+      """Logs the online/offline status and whether the device failed."""
+      with open(f"{logs}/device_status.txt", 'a') as file:
+          file.write(f"Comm_round: {n} - Device: {device.idx} - Status: {status}\n")
+
+    def evaluate(self, weights):
+      self.vqc.initial_point = weights
+      self.test_score_q4_1 = self.vqc.score(self.test_features, self.test_labels)
+
+#Synthetic 100
+import time
+import random
+
+import threading
+
+if data_size == "small":
+    server_test_features = server_test_features[:subset_size_server]
+    server_test_labels = server_test_labels[:subset_size_server]
+
+def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_sim):
+  devices_list = []
+  for i in range(num_devices):
+    device = Device(idx=i, data=devices_data[i], labels=devices_labels[i],  optimizer=optimizer, pca_n_component=pca_n_component, simulator=simulator, sampler_object=sampler, aer_sim=aer_sim, maxiter=random_number, warm_start=True)
+    devices_list.append(device)
+
+  server_device = Device(idx=num_devices,  data=server_test_features, labels=server_test_labels, optimizer=optimizer, pca_n_component=pca_n_component,  simulator=simulator, sampler_object=sampler, aer_sim=aer_sim, maxiter=random_number, warm_start=True)
+
+  date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
+
+  # logs = f"logs_revision_Dec13/{algorithm}_{date_time}_{data_used}_{subset_size_device}_{subset_size_server}_maxiter={maxiter}_numDevices={num_devices}"
+  # logs = f"logs/iris_qfl_{date_time}"
+  logs = f"logs_1iter/{simulator}_{data_used}_qfl_{date_time}_{num_devices}Devices_{random_number}iter"
+  if not os.path.exists(logs):
+      os.makedirs(logs)
+
+  if algorithm == "optimized-defaultQFL":
+
+    average_weights = None
+
+    for n in range(10):
+      comm_start_time = time.time()
+
+      def train_device(device, n):
+          # if n == 0:
+          #     device.vqc.initial_point = np.asarray([0.5] * device.ansatz.num_parameters)
+          # else:
+          if n > 0:
+              device.vqc.initial_point = average_weights
+          print(f"Device {device.idx} is training...")
+          device.training(n)
+          print(f"After Traing - Comm_round: {n} - Device {device.idx} - params: {device.vqc.weights}\n")
+          with open(f"{logs}/device_params.txt", 'a') as file:
+            file.write(f"Comm_round: {n} - Device {device.idx} - params: {device.vqc.weights}\n")
+          with open(f"{logs}/device.txt", 'a') as file:
+            file.write(f"Comm_round: {n} - Device: {device.idx}  - train_acc: {device.train_score_q4:.2f} - test_acc: {device.test_score_q4:.2f}\n")
+          with open(f"{logs}/training_time_device.txt", 'a') as file:
+            file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {device.training_time}\n")
+
+      threads_train_device = []
+
+      for device in devices_list:
+        device.current_comm_round = n
+        device_thread = threading.Thread(target=train_device, args=(device, n))
+        device_thread.start()
+        threads_train_device.append(device_thread)
+
+      for thread in threads_train_device:
+          thread.join()
+
+      print("Finished all devices training...")
+
+      weights_list = [device.vqc.weights for device in devices_list]
+      average_weights = np.mean(weights_list, axis=0)
+      with open(f"{logs}/average_weights.txt", 'a') as file:
+        file.write(f"Comm_round: {n} - average_weights: {average_weights}\n")
+
+      server_device.vqc.initial_point = average_weights
+      server_device.training(n)
+      with open(f"{logs}/training_time_server.txt", 'a') as file:
+        file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {server_device.training_time}\n")
+      with open(f"{logs}/server.txt", 'a') as file:
+          file.write(f"Comm_round: {n} - Device: {server_device.idx}  - train_acc: {server_device.train_score_q4:.2f} - test_acc: {server_device.test_score_q4:.2f}\n")
+      comm_end_time = time.time() - comm_start_time
+      print(f"Comm_round: {n} - Comm_time: {comm_end_time}")
+      with open(f"{logs}/comm_time.txt", 'a') as file:
+        file.write(f"Comm_round: {n} - Comm_time: {comm_end_time}\n")
+
+    with open(f"{logs}/objective_values_devices.txt", 'w') as file:
+      for device in devices_list:
+        file.write(f"Device {device.idx}: {device.objective_func_vals}\n")
+    with open(f"{logs}/server_objective_values_devices.txt", 'w') as file:
+      file.write(f"Device {server_device.idx}: {server_device.objective_func_vals}\n")
+
+    with open(f"{logs}/device_params_per_iter.txt", 'w') as file:
+      for device in devices_list:
+        file.write(f"Device {device.idx}: {device.params_per_iter}\n")
+    with open(f"{logs}/server_params_per_iter.txt", 'w') as file:
+      file.write(f"Device {server_device.idx}: {server_device.params_per_iter}\n")
+
+algorithms = [
+    'optimized-defaultQFL',
+    ]
+
+simulators = [
+    # 'sampler',
+    # 'aer_sim',
+    # 'aer_sim_ibm_brisbane',
+    'fake_manila',
+    # 'aer_sim_ibm_brisbane',
+    # 'aer_sim',
+    # 'sampler',
+    ]
+
+
+aer_sim = None
+sampler = None
+for simulator in simulators:
+  total_total_time = time.time()
+
+  if simulator == "sampler":
+    sampler = Sampler()
+    aer_sim = AerSimulator()
+  elif simulator == "aer_sim":
+    aer_sim = AerSimulator()
+    sampler = Sampler(mode=aer_sim)
+  # elif simulator == "aer_sim_ibm_brisbane":
+  #   # aer_sim = AerSimulator()
+  #   # Specify a QPU to use for the noise model
+  #   real_backend = service.backend("ibm_brisbane")
+  #   noise_model = NoiseModel.from_backend(real_backend)
+  #   # aer_sim = AerSimulator.from_backend(real_backend, max_memory_mb=-1)
+  #   aer_sim = AerSimulator(noise_model=noise_model)
+  #   sampler = Sampler(mode=aer_sim)
+  elif simulator == "fake_manila":
+    fake_manila = FakeManilaV2()
+    sampler = Sampler(mode=fake_manila)
+    aer_sim = fake_manila
+
+  # with Session(backend=aer_sim) as session:
+  for algorithm in algorithms:
+    # for simulator in simulators:
+    # sampler = Sampler(mode=session)
+    print(f"Algorithm: {algorithm}, Optimizer: {simulator}")
+    main_method(algorithm, "cobyla", 4, simulator=simulator, sampler=sampler, aer_sim=aer_sim)
+
+  total_total_time = time.time() - total_total_time
+  with open(f"logs_total_time/total_total_time.txt", "a") as file:
+      date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
+      file.write(f"{simulator}_{data_used}_qfl_{date_time}_{num_devices}Devices_{random_number}iter - Total time: {total_total_time}")
+
+  print("Total Time:", total_total_time)
+
+

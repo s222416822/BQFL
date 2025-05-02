@@ -1,0 +1,18 @@
+kurtosis run github.com/ethpandaops/ethereum-package --args-file network_params.yaml --image-download always
+https://docs.kurtosis.com/how-to-compose-your-own-testnet/
+
+ npx hardhat balances --network localnet
+
+
+npx hardhat compile
+npx hardhat run scripts/deploy.ts --network localnet
+
+
+!pip install qiskit
+!pip install qiskit_algorithms
+!pip install qiskit_machine_learning
+!pip install pylatexenc
+!pip install genomic-benchmarks
+!pip install qiskit-aer --upgrade
+!pip install qiskit-aer-gpu
+!pip install -q qiskit qiskit_algorithms qiskit_machine_learning pylatexenc genomic-benchmarks qiskit-aer --upgrade qiskit-aer-gpu

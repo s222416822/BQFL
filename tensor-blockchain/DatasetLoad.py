@@ -25,7 +25,7 @@ class DatasetLoad(object):
             pass
 
     def mnistDataSetConstruct(self, isIID):
-        data_dir = 'data/MNIST'
+        data_dir = '../data/MNIST'
         train_images_path = os.path.join(data_dir, 'train-images-idx3-ubyte.gz')
         train_labels_path = os.path.join(data_dir, 'train-labels-idx1-ubyte.gz')
         test_images_path = os.path.join(data_dir, 't10k-images-idx3-ubyte.gz')
