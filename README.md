@@ -29,7 +29,7 @@ Please install the required libraries.
 
 # To run: 
   Sample command:
-  
+
   $ python main_bfl.py -ha 7,2 [For BFL with 7 workers and 2 miners]
   
   $ python main_bqfl_avg.py -ha 7,2 [For BQFL-avg with 7 workers and 2 miners]

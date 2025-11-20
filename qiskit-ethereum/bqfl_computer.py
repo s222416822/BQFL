@@ -30,16 +30,12 @@ elif data_used == "genomics":
 
 
 random_number = 1
-# print(f"Random Number: {random_number} for Device {i}")
 if random_number == 1:
   maxiter = "1"
 else:
   maxiter = "random"
 
 from sklearn.datasets import load_iris, load_digits
-from sklearn.model_selection import train_test_split
-from qiskit_algorithms.utils import algorithm_globals
-import numpy as np
 
 import numpy as np
 from genomic_benchmarks.dataset_getters.pytorch_datasets import DemoHumanOrWorm
@@ -82,14 +78,6 @@ if data_used == "iris":
 
   features_iris = iris_data.data
   labels_iris = iris_data.target
-  #
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_iris[:, 0], y=features_iris[:, 1], hue=labels_iris, palette="tab10")
-  # plt.title("IRIS Dataset")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
-
   # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
       features_iris, labels_iris, train_size=0.9, random_state=algorithm_globals.random_seed)
@@ -172,14 +160,6 @@ elif data_used == "genomics":
   # convert to 4 features
   features_encoded_pca = PCA(n_components=4).fit_transform(encoded_sequences_np_reshaped)
   features_encoded_pca
-
-  plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_encoded_pca[:, 0], y=features_encoded_pca[:, 1], hue=labels_encoded_sequences_3D_np,
-  #                 palette="tab10")
-  # plt.title("Encoded Sequences")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
 
   # algorithm_globals.random_seed = 123
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
@@ -416,15 +396,6 @@ class Device:
         self.ansatz = RealAmplitudes(num_qubits=self.num_features, reps=3)
         self.ansatz.measure_all()
         self.warm_start = warm_start
-        # self.vqc = VQC(
-        #     sampler=self.sampler,
-        #     feature_map=self.feature_map,
-        #     ansatz=self.ansatz,
-        #     optimizer=self.optimizer,
-        #     callback=self.callback_graph,
-        #     # initial_point=initial_point,
-        #     warm_start=self.warm_start
-        # )
         pm = generate_preset_pass_manager(backend=self.aer_sim, optimization_level=1)
         # isa_qc = pm.run(qc)
         self.isa_qc_ansatz = pm.run(self.ansatz)
@@ -455,16 +426,11 @@ class Device:
         self.target = target
 
     def callback_graph(self, weights, obj_func_eval):
-        # clear_output(wait=True)
         self.objective_func_vals.append(obj_func_eval)
         self.params_per_iter.append(weights)
-        # plt.title(f"Device: {self.idx}")
-        # plt.xlabel("Iter")
-        # plt.ylabel("Loss")
-        # plt.plot(range(len(self.objective_func_vals)), self.objective_func_vals)
         print(f"Comm Round: {self.current_comm_round} - Device {self.idx} - Weights: {weights}\n")
         print(f"Comm Round: {self.current_comm_round} - Device {self.idx} -Objectivve Func Eval: {obj_func_eval}\n")
-        # plt.show()
+
 
     def training(self, initial_point=None):
         print(f"Train Features Shape: {self.train_features.shape}")
@@ -483,7 +449,6 @@ class Device:
         print(f"Quantum VQC on the test dataset:     {self.test_score_q4:.2f}")
 
     def log_status(self, n, device, status, logs):
-      """Logs the online/offline status and whether the device failed."""
       with open(f"{logs}/device_status.txt", 'a') as file:
           file.write(f"Comm_round: {n} - Device: {device.idx} - Status: {status}\n")
 
@@ -493,8 +458,6 @@ class Device:
 
 #Synthetic 100
 import time
-import random
-
 import threading
 
 if data_size == "small":
@@ -511,9 +474,8 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
 
   date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
 
-  # logs = f"logs_revision_Dec13_ParametersForSimulation_1_{data_used}/Final_3/{simulator}_{data_used}_Final_1/{algorithm}_1_{optimizer}_{pca_n_component}_{date_time}_{data_used}_{subset_size_device}_{subset_size_server}_maxiter={maxiter}_numDevices={num_devices}"
-  # logs = f"logs"
-  logs = f"logs/{simulator}_{data_used}_bqfl_{date_time}_{num_devices}Devices_{random_number}iter"
+
+  logs = f"logs"
 
   if not os.path.exists(logs):
       os.makedirs(logs)
@@ -600,33 +562,10 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
       # average_weights = float_weights
       # weights_list = [device.vqc.weights for device in devices_list]
       # average_weights = np.mean(weights_list, axis=0)
-      with open(f"{logs}/average_weights.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - average_weights: {average_weights}\n")
 
-      server_device.vqc.initial_point = average_weights
-      server_device.training(n)
-
-      contract.functions.resetAggregation().call()
-      with open(f"{logs}/training_time_server.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {server_device.training_time}\n")
-      with open(f"{logs}/server.txt", 'a') as file:
-          file.write(f"Comm_round: {n} - Device: {server_device.idx}  - train_acc: {server_device.train_score_q4:.2f} - test_acc: {server_device.test_score_q4:.2f}\n")
       comm_end_time = time.time() - comm_start_time
       print(f"Comm_round: {n} - Comm_time: {comm_end_time}")
-      with open(f"{logs}/comm_time.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Comm_time: {comm_end_time}\n")
 
-    with open(f"{logs}/objective_values_devices.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.objective_func_vals}\n")
-    with open(f"{logs}/server_objective_values_devices.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.objective_func_vals}\n")
-
-    with open(f"{logs}/device_params_per_iter.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.params_per_iter}\n")
-    with open(f"{logs}/server_params_per_iter.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.params_per_iter}\n")
 
 algorithms = [
     'optimized-defaultQFL',
@@ -649,7 +588,6 @@ sampler = None
 for simulator in simulators:
   total_total_time = time.time()
 
-
   if simulator == "sampler":
     sampler = Sampler()
     aer_sim = AerSimulator()
@@ -661,18 +599,6 @@ for simulator in simulators:
       backend = service.least_busy(operational=True, simulator=False)
       sampler = Sampler(mode=backend)
       aer_sim = backend
-  # elif simulator == "aer_sim_ibm_brisbane":
-  #   # aer_sim = AerSimulator()
-  #   # Specify a QPU to use for the noise model
-  #   real_backend = service.backend("ibm_brisbane")
-  #   noise_model = NoiseModel.from_backend(real_backend)
-  #   # aer_sim = AerSimulator.from_backend(real_backend, max_memory_mb=-1)
-  #   aer_sim = AerSimulator(noise_model=noise_model)
-  #   sampler = Sampler(mode=aer_sim)
-  # elif simulator == "fake_manila":
-  #   fake_manila = FakeManilaV2()
-  #   sampler = Sampler(mode=fake_manila)
-  #   aer_sim = fake_manila
 
   # with Session(backend=aer_sim) as session:
   for algorithm in algorithms:
@@ -682,17 +608,8 @@ for simulator in simulators:
     main_method(algorithm, "cobyla", 4, simulator=simulator, sampler=sampler, aer_sim=aer_sim)
 
   total_total_time = time.time() - total_total_time
-  with open(f"logs_total_time/total_total_time.txt", "a") as file:
-      date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
-      file.write(
-          f"{simulator}_{data_used}_qfl_{date_time}_{num_devices}Devices_{random_number}iter - Total time: {total_total_time}")
 
   print("Total Time:", total_total_time)
-  # with Session(backend=aer_sim) as session:
-  # for algorithm in algorithms:
-  #   # for simulator in simulators:
-  #     # sampler = Sampler(mode=session)
-  #   print(f"Algorithm: {algorithm}, Optimizer: {simulator}")
-  #   main_method(algorithm, "cobyla", 4, simulator=simulator, sampler=sampler, aer_sim=aer_sim)
+
 
 

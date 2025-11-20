@@ -74,7 +74,6 @@ def _read32(bytestream):
 
 
 def extract_images(filename):
-    """Extract the images into a 4D uint8 numpy array [index, y, x, depth]."""
     print('Extracting', filename)
     with gzip.open(filename) as bytestream:
         magic = _read32(bytestream)
@@ -92,7 +91,6 @@ def extract_images(filename):
 
 
 def dense_to_one_hot(labels_dense, num_classes=10):
-    """Convert class labels from scalars to one-hot vectors."""
     num_labels = labels_dense.shape[0]
     index_offset = np.arange(num_labels) * num_classes
     labels_one_hot = np.zeros((num_labels, num_classes))
@@ -101,7 +99,6 @@ def dense_to_one_hot(labels_dense, num_classes=10):
 
 
 def extract_labels(filename):
-    """Extract the labels into a 1D uint8 numpy array [index]."""
     print('Extracting', filename)
     with gzip.open(filename) as bytestream:
         magic = _read32(bytestream)

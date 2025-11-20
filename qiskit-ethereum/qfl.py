@@ -6,7 +6,6 @@ from qiskit_aer.noise import NoiseModel
 from qiskit_ibm_runtime import Session, SamplerV2 as Sampler, QiskitRuntimeService
 from qiskit_ibm_runtime.fake_provider import FakeManilaV2
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-# from qiskit-ethereum.primitives import Sampler
 
 # data_used = "synthetic"
 data_used = "iris"
@@ -37,16 +36,12 @@ elif data_used == "genomics":
 
 
 random_number = 1
-# print(f"Random Number: {random_number} for Device {i}")
 if random_number == 1:
   maxiter = "1"
 else:
   maxiter = "random"
 
 from sklearn.datasets import load_iris, load_digits
-from sklearn.model_selection import train_test_split
-from qiskit_algorithms.utils import algorithm_globals
-import numpy as np
 
 import numpy as np
 from genomic_benchmarks.dataset_getters.pytorch_datasets import DemoHumanOrWorm
@@ -57,9 +52,6 @@ from sklearn.model_selection import train_test_split
 from qiskit.circuit.library import ZZFeatureMap
 from qiskit.circuit.library import RealAmplitudes
 from qiskit_algorithms.optimizers import COBYLA, GradientDescent
-# from qiskit-ethereum.primitives import Sampler, StatevectorSampler
-from matplotlib import pyplot as plt
-from IPython.display import clear_output
 import time
 from qiskit_machine_learning.algorithms.classifiers import VQC
 
@@ -80,14 +72,6 @@ if data_used == "iris":
 
   features_iris = iris_data.data
   labels_iris = iris_data.target
-  #
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_iris[:, 0], y=features_iris[:, 1], hue=labels_iris, palette="tab10")
-  # plt.title("IRIS Dataset")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
-
   # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
       features_iris, labels_iris, train_size=0.9, random_state=algorithm_globals.random_seed)
@@ -111,13 +95,6 @@ elif data_used == "mnist":
   # Apply PCA for dimensionality reduction
   features_mnist_pca = PCA(n_components=4).fit_transform(features_mnist)
 
-  # Plot the PCA-transformed features
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_mnist_pca[:, 0], y=features_mnist_pca[:, 1], hue=labels_mnist, palette="tab10")
-  # plt.title("MNIST Dataset")
-  # plt.xlabel("Principal Component 1")
-  # plt.ylabel("Principal Component 2")
-  # plt.show()
 
   # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
@@ -170,15 +147,6 @@ elif data_used == "genomics":
   # convert to 4 features
   features_encoded_pca = PCA(n_components=4).fit_transform(encoded_sequences_np_reshaped)
   features_encoded_pca
-
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_encoded_pca[:, 0], y=features_encoded_pca[:, 1], hue=labels_encoded_sequences_3D_np,
-  #                 palette="tab10")
-  # plt.title("Encoded Sequences")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
-
   # algorithm_globals.random_seed = 123
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
       features_encoded_pca, labels_encoded_sequences_3D_np, train_size=0.8,
@@ -353,12 +321,7 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
     devices_list.append(device)
 
   server_device = Device(idx=num_devices,  data=server_test_features, labels=server_test_labels, optimizer=optimizer, pca_n_component=pca_n_component,  simulator=simulator, sampler_object=sampler, aer_sim=aer_sim, maxiter=random_number, warm_start=True)
-
-  date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
-
-  # logs = f"logs_revision_Dec13/{algorithm}_{date_time}_{data_used}_{subset_size_device}_{subset_size_server}_maxiter={maxiter}_numDevices={num_devices}"
-  # logs = f"logs/iris_qfl_{date_time}"
-  logs = f"logs_1iter/{simulator}_{data_used}_qfl_{date_time}_{num_devices}Devices_{random_number}iter"
+  logs = f"logs"
   if not os.path.exists(logs):
       os.makedirs(logs)
 
@@ -403,28 +366,9 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
       with open(f"{logs}/average_weights.txt", 'a') as file:
         file.write(f"Comm_round: {n} - average_weights: {average_weights}\n")
 
-      server_device.vqc.initial_point = average_weights
-      server_device.training(n)
-      with open(f"{logs}/training_time_server.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {server_device.training_time}\n")
-      with open(f"{logs}/server.txt", 'a') as file:
-          file.write(f"Comm_round: {n} - Device: {server_device.idx}  - train_acc: {server_device.train_score_q4:.2f} - test_acc: {server_device.test_score_q4:.2f}\n")
       comm_end_time = time.time() - comm_start_time
       print(f"Comm_round: {n} - Comm_time: {comm_end_time}")
-      with open(f"{logs}/comm_time.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Comm_time: {comm_end_time}\n")
 
-    with open(f"{logs}/objective_values_devices.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.objective_func_vals}\n")
-    with open(f"{logs}/server_objective_values_devices.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.objective_func_vals}\n")
-
-    with open(f"{logs}/device_params_per_iter.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.params_per_iter}\n")
-    with open(f"{logs}/server_params_per_iter.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.params_per_iter}\n")
 
 algorithms = [
     'optimized-defaultQFL',

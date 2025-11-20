@@ -8,8 +8,6 @@ data_used = "genomics"
 # data_used = "mnist_keras"
 # data_used = "fashion"
 
-#
-# data_size = "normal"
 data_size = "small"
 subset_size_device = 1000
 subset_size_server = 100
@@ -30,18 +28,12 @@ elif data_used == "genomics":
 
 
 random_number = 30
-# print(f"Random Number: {random_number} for Device {i}")
 if random_number == 30:
   maxiter = "30"
 else:
   maxiter = "random"
 
 from sklearn.datasets import load_iris, load_digits
-from sklearn.model_selection import train_test_split
-from qiskit_algorithms.utils import algorithm_globals
-import numpy as np
-
-import numpy as np
 from genomic_benchmarks.dataset_getters.pytorch_datasets import DemoHumanOrWorm
 import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
@@ -50,16 +42,11 @@ from sklearn.model_selection import train_test_split
 from qiskit.circuit.library import ZZFeatureMap
 from qiskit.circuit.library import RealAmplitudes
 from qiskit_algorithms.optimizers import COBYLA, GradientDescent
-# from qiskit-ethereum.primitives import Sampler, StatevectorSampler
-from matplotlib import pyplot as plt
-from IPython.display import clear_output
-import time
 from qiskit_machine_learning.algorithms.classifiers import VQC
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.datasets import load_iris
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
+
 import numpy as np
 
 from sklearn.decomposition import PCA
@@ -69,24 +56,11 @@ from qiskit_ibm_runtime import QiskitRuntimeService
 
 service = QiskitRuntimeService(channel="ibm_quantum", token="IBM_TOKEN")
 
-
-
-# data_used = "iris"
-
 if data_used == "iris":
   iris_data = load_iris()
 
   features_iris = iris_data.data
   labels_iris = iris_data.target
-  #
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_iris[:, 0], y=features_iris[:, 1], hue=labels_iris, palette="tab10")
-  # plt.title("IRIS Dataset")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
-
-  # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
       features_iris, labels_iris, train_size=0.9, random_state=algorithm_globals.random_seed)
 
@@ -105,19 +79,7 @@ elif data_used == "mnist":
   mnist_data = load_digits()
   features_mnist = mnist_data.data
   labels_mnist = mnist_data.target
-
-  # Apply PCA for dimensionality reduction
   features_mnist_pca = PCA(n_components=4).fit_transform(features_mnist)
-
-  # Plot the PCA-transformed features
-  # plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_mnist_pca[:, 0], y=features_mnist_pca[:, 1], hue=labels_mnist, palette="tab10")
-  # plt.title("MNIST Dataset")
-  # plt.xlabel("Principal Component 1")
-  # plt.ylabel("Principal Component 2")
-  # plt.show()
-
-  # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
       features_mnist, labels_mnist, train_size=0.8, random_state=algorithm_globals.random_seed)
 
@@ -169,13 +131,7 @@ elif data_used == "genomics":
   features_encoded_pca = PCA(n_components=4).fit_transform(encoded_sequences_np_reshaped)
   features_encoded_pca
 
-  plt.rcParams["figure.figsize"] = (6, 6)
-  # sns.scatterplot(x=features_encoded_pca[:, 0], y=features_encoded_pca[:, 1], hue=labels_encoded_sequences_3D_np,
-  #                 palette="tab10")
-  # plt.title("Encoded Sequences")
-  # plt.xlabel("Feature 1")
-  # plt.ylabel("Feature 2")
-  # plt.show()
+
 
   # algorithm_globals.random_seed = 123
   alldevices_train_features, server_test_features, alldevices_train_labels, server_test_labels = train_test_split(
@@ -270,20 +226,6 @@ abi = '[{"inputs":[{"internalType":"address[]","name":"_accounts","type":"addres
 
 contract = w3.eth.contract(address=contract_address, abi=abi)
 
-# accounts = [
-#     {
-#         "address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-#         "private_key": "bcdf20249abf0ed6d944c0288fad489e33f66b3960d9e6229c1cd214ed3bbe31"
-#     },
-#     {
-#         "address": "0xE25583099BA105D9ec0A67f5Ae86D90e50036425",
-#         "private_key": "39725efee3fb28614de3bacaffe4cc4bd8c436257e2c8bb887c4b5c4be45e76d"
-#     },
-#     {
-#         "address": "0x614561D2d143621E126e87831AEF287678B442b8",
-#         "private_key": "53321db7c1e331d93a11a41d16f004d7ff63972ec8ec7c25db329728ceeb1710"
-#     }
-# ]
 
 pre_funded_accounts = {
     "pre_funded_accounts": [
@@ -410,28 +352,17 @@ class Device:
         self.ansatz = RealAmplitudes(num_qubits=self.num_features, reps=3)
         self.ansatz.measure_all()
         self.warm_start = warm_start
-        # self.vqc = VQC(
-        #     sampler=self.sampler,
-        #     feature_map=self.feature_map,
-        #     ansatz=self.ansatz,
-        #     optimizer=self.optimizer,
-        #     callback=self.callback_graph,
-        #     # initial_point=initial_point,
-        #     warm_start=self.warm_start
-        # )
+
         pm = generate_preset_pass_manager(backend=self.aer_sim, optimization_level=1)
         # isa_qc = pm.run(qc)
         self.isa_qc_ansatz = pm.run(self.ansatz)
         self.isa_qc_feature_map = pm.run(self.feature_map)
         self.vqc = VQC(
             sampler=self.sampler,
-            # feature_map=self.feature_map,
             feature_map=self.isa_qc_feature_map,
-            # ansatz=self.ansatz,
             ansatz=self.isa_qc_ansatz,
             optimizer=self.optimizer,
             callback=self.callback_graph,
-            # initial_point=initial_point,
             warm_start=self.warm_start
         )
 
@@ -452,10 +383,6 @@ class Device:
         # clear_output(wait=True)
         self.objective_func_vals.append(obj_func_eval)
         self.params_per_iter.append(weights)
-        # plt.title(f"Device: {self.idx}")
-        # plt.xlabel("Iter")
-        # plt.ylabel("Loss")
-        # plt.plot(range(len(self.objective_func_vals)), self.objective_func_vals)
         print(f"Comm Round: {self.current_comm_round} - Device {self.idx} - Weights: {weights}\n")
         print(f"Comm Round: {self.current_comm_round} - Device {self.idx} -Objectivve Func Eval: {obj_func_eval}\n")
         # plt.show()
@@ -503,11 +430,7 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
 
   server_device = Device(idx=num_devices,  data=server_test_features, labels=server_test_labels, optimizer=optimizer, pca_n_component=pca_n_component,  simulator=simulator, sampler_object=sampler, aer_sim=aer_sim, maxiter=random_number, warm_start=True)
 
-  date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
-
-  # logs = f"logs_revision_Dec13_ParametersForSimulation_1_{data_used}/Final_3/{simulator}_{data_used}_Final_1/{algorithm}_1_{optimizer}_{pca_n_component}_{date_time}_{data_used}_{subset_size_device}_{subset_size_server}_maxiter={maxiter}_numDevices={num_devices}"
-  # logs = f"logs"
-  logs = f"logs/for_noise_impact/{simulator}_{data_used}_bqfl_{date_time}_{num_devices}Devices_{random_number}iter"
+  logs = f"logs"
 
   if not os.path.exists(logs):
       os.makedirs(logs)
@@ -542,22 +465,10 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
           tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
           tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
           send_time_to_blockchain = time.time_ns() - send_time_to_blockchain
-
-          with open(f"{logs}/model_sent_time_to_blockchain.txt", 'a') as file:
-              file.write(f"Comm_round: {n} - Device {device.idx} - send_time_to_blockchain: {send_time_to_blockchain}\n")
-
-          with open(f"{logs}/transaction_receipt.txt", 'a') as file:
-              file.write(f"Comm_round: {n} - Device {device.idx} - tx_receipt: {tx_receipt}\n")
-
           print(f"Transaction hash: {tx_hash.hex()}")
           print(f"Transaction receipt: {tx_receipt}")
 
-          with open(f"{logs}/device_params.txt", 'a') as file:
-            file.write(f"Comm_round: {n} - Device {device.idx} - params: {device.vqc.weights}\n")
-          with open(f"{logs}/device.txt", 'a') as file:
-            file.write(f"Comm_round: {n} - Device: {device.idx}  - train_acc: {device.train_score_q4:.2f} - test_acc: {device.test_score_q4:.2f}\n")
-          with open(f"{logs}/training_time_device.txt", 'a') as file:
-            file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {device.training_time}\n")
+
 
       threads_train_device = []
 
@@ -596,33 +507,14 @@ def main_method(algorithm, optimizer, pca_n_component, simulator, sampler, aer_s
       # average_weights = float_weights
       # weights_list = [device.vqc.weights for device in devices_list]
       # average_weights = np.mean(weights_list, axis=0)
-      with open(f"{logs}/average_weights.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - average_weights: {average_weights}\n")
 
-      server_device.vqc.initial_point = average_weights
-      server_device.training(n)
 
-      contract.functions.resetAggregation().call()
-      with open(f"{logs}/training_time_server.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Device: {device.idx} - training_time: {server_device.training_time}\n")
-      with open(f"{logs}/server.txt", 'a') as file:
-          file.write(f"Comm_round: {n} - Device: {server_device.idx}  - train_acc: {server_device.train_score_q4:.2f} - test_acc: {server_device.test_score_q4:.2f}\n")
       comm_end_time = time.time() - comm_start_time
       print(f"Comm_round: {n} - Comm_time: {comm_end_time}")
-      with open(f"{logs}/comm_time.txt", 'a') as file:
-        file.write(f"Comm_round: {n} - Comm_time: {comm_end_time}\n")
 
-    with open(f"{logs}/objective_values_devices.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.objective_func_vals}\n")
-    with open(f"{logs}/server_objective_values_devices.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.objective_func_vals}\n")
 
-    with open(f"{logs}/device_params_per_iter.txt", 'w') as file:
-      for device in devices_list:
-        file.write(f"Device {device.idx}: {device.params_per_iter}\n")
-    with open(f"{logs}/server_params_per_iter.txt", 'w') as file:
-      file.write(f"Device {server_device.idx}: {server_device.params_per_iter}\n")
+
+
 
 algorithms = [
     'optimized-defaultQFL',
